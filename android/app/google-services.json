@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "397973117232",
+    "project_id": "absenma-9a01e",
+    "storage_bucket": "absenma-9a01e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:397973117232:android:8a7a3158ae3c05a2d190f5",
+        "android_client_info": {
+          "package_name": "com.sabilulhasanah.absenma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCtatN0NqOWUzT3y3enh45nS-A7PMLMPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

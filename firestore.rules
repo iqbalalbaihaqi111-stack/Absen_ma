@@ -1,0 +1,110 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        || (signedIn() && userId == request.auth.uid
+          && request.resource.data.role == 'guru'
+          && request.resource.data.isActive == true);
+      allow update: if isAdmin()
+        || (signedIn() && userId == request.auth.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.isActive == resource.data.isActive
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['nama', 'nip', 'nomor_urut', 'photoUrl', 'updatedAt', 'lastLoginAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /guru/{guruId} {
+      allow read: if isAdmin()
+        || (signedIn() && (guruId == request.auth.uid
+          || resource.data.uid == request.auth.uid));
+      allow create: if isAdmin()
+        || (signedIn() && guruId == request.auth.uid
+          && request.resource.data.role != 'admin');
+      allow update: if isAdmin()
+        || (signedIn() && guruId == request.auth.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['nama', 'fotoUrl', 'noHp', 'email', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /jadwal/{jadwalId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /info_sekolah/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /chats/{chatId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /absensi/{docId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin()
+        || (signedIn() && request.resource.data.userId == request.auth.uid);
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /riwayat_kehadiran/{docId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.guruId == request.auth.uid);
+      allow create: if isAdmin()
+        || (signedIn() && request.resource.data.guruId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /izin_sakit/{docId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin()
+        || (signedIn() && request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /jurnal_mengajar/{docId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /agenda/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /pengumuman/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
